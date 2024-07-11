@@ -111,7 +111,11 @@ class CDMSModuleLoader():
         if self.__pymodule is None:
             raise ImportError(f'Failed to load module from [{os.path.join(path, pyfile)}]')
 
-        spec.loader.exec_module(self.__pymodule)
+        try:
+            spec.loader.exec_module(self.__pymodule)
+        except Exception as err:
+            # if failed to execute module, reraise any as ImportErrors
+            raise ImportError(f'Failed to execute module [{os.path.join(path, pyfile)}]: {err}') from err
         log.debug('Executed module [%s]', self.__pymodule.__name__)
 
         self.__cmds = getattr(self.__pymodule, 'CMDS', None)
